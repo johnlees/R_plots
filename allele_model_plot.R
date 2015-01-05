@@ -14,7 +14,7 @@ library(plyr)
 data_location <- "~/Documents/PhD/hsd_locus/mapping"
 
 mcmc_file <- paste(data_location, "model2.Rdata", sep="/")
-pairs_file <- paste(data_location, "strep_pairs.txt", sep="/")
+pairs_file <- paste(data_location, "pair_rows.txt", sep="/")
 
 # Outcomes
 alleles = c("A", "B", "C", "D", "E", "F")
@@ -25,24 +25,7 @@ parameters = c("mu[1,1]", "mu[2,1]", "mu[1,2]", "mu[2,2]", "mu[1,3]", "mu[2,3]",
 	"mu[1,4]", "mu[2,4]", "mu[1,5]", "mu[2,5]", "mu[1,6]", "mu[2,6]")
 
 #
-# Functions
-#
-intervals <- function(chains,file_out="confidence_intervals.txt")
-{
-	conf_intervals <- p.interval(chains,HPD=TRUE)
-	means <- colMeans(chains)
-
-	capture.output(conf_intervals,file_out)	
-	return(means, conf_intervals)
-}
-
-
-#
 # Main
-#
-
-#
-# Read in data
 #
 
 #
@@ -69,6 +52,10 @@ intervals <- function(chains,file_out="confidence_intervals.txt")
 # summary(coda_samples2[,"alpha[1,2]",drop=FALSE])
 # plot(coda_samples2[,"alpha[1,2]",drop=FALSE])
 
+#
+# Read in data
+#
+
 # Read in data from allele_model.R
 mcmc_samples <- readRDS(mcmc_file)
 all_chains <- as.matrix(mcmc_samples)
@@ -83,8 +70,8 @@ autocorr.plot(mcmc_samples[,c("kappa","mu[1,1]","mu[2,1]"),drop=FALSE])
 dev.off()
 
 # Chain convergence
-gelman <- gelman.diag(mcmc_samples)
-heidel <- heidel.diag(mcmc_samples)
+gelman <- gelman.diag(mcmc_samples[,c(parameters,"kappa"),drop=FALSE])
+heidel <- heidel.diag(mcmc_samples[,c(parameters,"kappa"),drop=FALSE])
 capture.output(list("gelman"=gelman,"heidel"=heidel),file="convergence_diagnostics.txt")
 
 pdf("kappa_gelman.pdf")
@@ -96,30 +83,41 @@ pdf("kappa_chain.pdf")
 plot(mcmc_samples[,"kappa",drop=F])
 dev.off()
 
+kappa_data = as.data.frame(all_chains[,"kappa"])
+colnames(kappa_data) = "kappa"
+
 pdf("kappa_posterior.pdf")
-ggplot(kappa_data, aes(x=kappa)) 
-+ geom_histogram(aes(y=..density..), binwidth=0.025,colour="black",fill="white") 
-+ geom_density(alpha=0.2, fill="#FF9999")
+ggplot(kappa_data, aes(x=kappa)) + 
+geom_histogram(aes(y=..density..), binwidth=0.025,colour="black",fill="white") + 
+geom_density(alpha=0.2, fill="#FF9999")
 dev.off()
 
 # means and 95% HPD intervals, concatenating all chains together
-(conf_intervals, means) = intervals(all_chains,"confidence_intervals.txt")
+conf_intervals <- p.interval(all_chains,HPD=TRUE)
+capture.output(conf_intervals,file="confidence_intervals.txt")
+means = colMeans(all_chains)
 
 # 6*2 means and 95% CIs for mus
 # 	geom pointrange plot of this
 #   could also try plotting multiple geom_density, for each allele
-tissue_alleles <- as.data.frame(rep(alleles,length(tissues)))
+tissue_alleles <- as.data.frame(rep(alleles,each=length(tissues)))
+colnames(tissue_alleles)[1] = "alleles"
 tissue_alleles$tissue <- rep(tissues,length(alleles))
 tissue_alleles$means = means[parameters]
 tissue_alleles$upper = conf_intervals[parameters,"Upper"]
 tissue_alleles$lower = conf_intervals[parameters,"Lower"]
 
+pdf("tissue_alleles.pdf",width=10,height=7)
 ggplot(tissue_alleles) + 
-geom_pointrange(aes(x=alleles,y=means,ymax=upper,ymin=lower,colour=tissue),position=position_dodge(width=0.9)) 
-+ xlab("Allele") + ylab("Proportion in tissue") + ylim(0,1)
+geom_pointrange(aes(x=alleles,y=means,ymax=upper,ymin=lower,colour=tissue),position=position_dodge(width=0.9),size=0.8) + 
+xlab("Allele") + ylab("Proportion in tissue") + ylim(0,1) + theme_grey(base_size = 18)
+dev.off()
 
 # 6*1192 means and 95% CIs for pis
 # 6*(1192/2) means and 95% CIs for pi[csf] - pi[blood] for all pairs
+mcmc_diff <- matrix(data=NA,nrow=nrow(all_chains),ncol=(nrow(paired_samples)*length(alleles)))
+col_headers <- vector(mode="character",length=(nrow(paired_samples)*length(alleles)))
+
 for (i in 1:nrow(paired_samples))
 {
 	csf_sample = paste("pi[",paired_samples$CSF_index[i],",",sep='')
@@ -127,14 +125,17 @@ for (i in 1:nrow(paired_samples))
 
 	for (j in 1:length(alleles))
 	{
-		csf_allele = paste(csf_sample,j,"]",sep='')
+		column_number = (i-1)*length(alleles) + j
+    
+    csf_allele = paste(csf_sample,j,"]",sep='')
 		blood_allele = paste(blood_sample,j,"]",sep='')
 		
-		mcmc_diff[,i+j] = all_chains[,csf_sample] - all_chains[,blood_sample]
-		row_headers = c(row_headers, paste(paired_samples$samples[i],"_",alleles[j])
+		mcmc_diff[,column_number] = all_chains[,csf_allele] - all_chains[,blood_allele]
+    col_headers[column_number] = paste(paired_samples$Sample[i],alleles[j],sep='_')
 	}
 }
+colnames(mcmc_diff) = col_headers
 
-rownames(mcmc_diff) = row_headers
-
-(pairs_conf_intervals, pairs_means) = intervals(mcmc_diff,"pairs_intervals.txt")
+# Print out confidence intervals
+pair_conf_intervals <- p.interval(mcmc_diff,HPD=TRUE)
+capture.output(pair_conf_intervals,file="pairs_intervals.txt")
