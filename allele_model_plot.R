@@ -96,6 +96,7 @@ dev.off()
 conf_intervals <- p.interval(all_chains,HPD=TRUE)
 capture.output(conf_intervals,file="confidence_intervals.txt")
 means = colMeans(all_chains)
+capture.output(means,file="means.txt")
 
 # 6*2 means and 95% CIs for mus
 # 	geom pointrange plot of this
