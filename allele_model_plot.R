@@ -13,7 +13,7 @@ library(plyr)
 # Data input
 data_location <- "~/Documents/PhD/hsd_locus/mapping"
 
-mcmc_file <- paste(data_location, "model2.Rdata", sep="/")
+mcmc_file <- paste(data_location, "chain2.Rdata", sep="/")
 pairs_file <- paste(data_location, "pair_rows.txt", sep="/")
 
 # Outcomes
