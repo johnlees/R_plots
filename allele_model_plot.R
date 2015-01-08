@@ -81,12 +81,12 @@ gelman <- gelman.diag(mcmc_samples_model1[,model1_parameters,drop=FALSE])
 heidel <- heidel.diag(mcmc_samples_model1[,model1_parameters,drop=FALSE])
 capture.output(list("gelman"=gelman,"heidel"=heidel),file="model1_convergence_diagnostics.txt")
 
-pdf("kappa_gelman_model1.pdf")
+pdf("kappa_gelman_model1.pdf",width=10,height=7)
 gelman.plot(mcmc_samples_model1[,"kappa",drop=FALSE])
 dev.off()
 
 # Plot of kappa + chain, ggplot of kappa
-pdf("kappa_chain_model1.pdf")
+pdf("kappa_chain_model1.pdf",width=10,height=7)
 plot(mcmc_samples_model1[,"kappa",drop=F])
 dev.off()
 
@@ -103,19 +103,19 @@ gelman <- list(gelman.diag(mcmc_samples_model2[,c("kappa",model2_parameters[1:10
 heidel <- heidel.diag(mcmc_samples_model2[,c(model2_parameters,"kappa"),drop=FALSE])
 capture.output(list("gelman"=gelman,"heidel"=heidel),file="model2_convergence_diagnostics.txt")
 
-pdf("kappa_gelman_model2.pdf")
+pdf("kappa_gelman_model2.pdf",width=10,height=7)
 gelman.plot(mcmc_samples_model2[,"kappa",drop=FALSE])
 dev.off()
 
 # Plot of kappa + chain, ggplot of kappa
-pdf("kappa_chain_model2.pdf")
+pdf("kappa_chain_model2.pdf",width=10,height=7)
 plot(mcmc_samples_model2[,"kappa",drop=F])
 dev.off()
 
 kappa_data = as.data.frame(all_chains2[,"kappa"])
 colnames(kappa_data) = "kappa"
 
-pdf("kappa_posterior.pdf")
+pdf("kappa_posterior.pdf",width=10,height=7)
 ggplot(kappa_data, aes(x=kappa)) +
 geom_histogram(aes(y=..density..), binwidth=0.025,colour="black",fill="white") +
 geom_density(alpha=0.2, fill="#FF9999")
@@ -139,8 +139,8 @@ tissue_alleles$lower = conf_intervals[model2_parameters,"Lower"]
 
 pdf("tissue_alleles.pdf",width=10,height=7)
 ggplot(tissue_alleles) +
-geom_pointrange(aes(x=alleles,y=means,ymax=upper,ymin=lower,colour=tissue),position=position_dodge(width=0.5,size=0.8) +
-xlab("Allele") + ylab("Proportion in tissue") + ylim(0,1) + theme_grey(base_size = 18)
+geom_pointrange(aes(x=alleles,y=means,ymax=upper,ymin=lower,colour=tissue),position=position_dodge(width=0.5,size=0.8)) +
+xlab("Allele") + ylab("Proportion in tissue") + ylim(0,1) + theme_bw(base_size = 18)
 dev.off()
 
 # 6*1192 means and 95% CIs for pis
