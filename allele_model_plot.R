@@ -139,8 +139,8 @@ tissue_alleles$lower = conf_intervals[model2_parameters,"Lower"]
 
 pdf("tissue_alleles.pdf",width=10,height=7)
 ggplot(tissue_alleles) +
-geom_pointrange(aes(x=alleles,y=means,ymax=upper,ymin=lower,colour=tissue),position=position_dodge(width=0.5,size=0.8)) +
-xlab("Allele") + ylab("Proportion in tissue") + ylim(0,1) + theme_bw(base_size = 18)
+geom_pointrange(aes(x=alleles,y=means,ymax=upper,ymin=lower,colour=tissue,size=0.8),position=position_dodge(width=0.5)) +
+xlab("Allele") + ylab("Proportion in tissue") + ylim(0,1) + theme_bw(base_size = 15)
 dev.off()
 
 # 6*1192 means and 95% CIs for pis
