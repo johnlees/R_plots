@@ -118,7 +118,7 @@ colnames(kappa_data) = "kappa"
 pdf("kappa_posterior.pdf",width=10,height=7)
 ggplot(kappa_data, aes(x=kappa)) +
 geom_histogram(aes(y=..density..), binwidth=0.025,colour="black",fill="white") +
-geom_density(alpha=0.2, fill="#FF9999")
+geom_density(alpha=0.2, fill="#FF9999") + theme_bw(base_size = 14)
 dev.off()
 
 # means and 95% HPD intervals, concatenating all chains together
