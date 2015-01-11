@@ -131,15 +131,15 @@ capture.output(means,file="means.txt")
 # 	geom pointrange plot of this
 #   could also try plotting multiple geom_density, for each allele
 tissue_alleles <- as.data.frame(rep(alleles,each=length(tissues)))
-colnames(tissue_alleles)[1] = "alleles"
-tissue_alleles$tissue <- rep(tissues,length(alleles))
-tissue_alleles$means = means[model2_parameters]
-tissue_alleles$upper = conf_intervals[model2_parameters,"Upper"]
-tissue_alleles$lower = conf_intervals[model2_parameters,"Lower"]
+colnames(tissue_alleles)[1] = "Allele"
+tissue_alleles$Tissue <- rep(tissues,length(alleles))
+tissue_alleles$Mean = means[model2_parameters]
+tissue_alleles$Upper = conf_intervals[model2_parameters,"Upper"]
+tissue_alleles$Lower = conf_intervals[model2_parameters,"Lower"]
 
 pdf("tissue_alleles.pdf",width=10,height=7)
 ggplot(tissue_alleles) +
-geom_pointrange(aes(x=alleles,y=means,ymax=upper,ymin=lower,colour=tissue,size=0.8),position=position_dodge(width=0.5)) +
+geom_pointrange(aes(x=Allele,y=Mean,ymax=Upper,ymin=Lower,colour=Tissue),position=position_dodge(width=0.5),size=0.8) +
 xlab("Allele") + ylab("Proportion in tissue") + ylim(0,1) + theme_bw(base_size = 15)
 dev.off()
 
