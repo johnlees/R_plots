@@ -23,6 +23,7 @@ tissues = c("CSF", "Blood")
 
 # Top level parameters
 model1_parameters = c("kappa","mu[1]","mu[2]")
+model2_kappa = c("kappa[1]","kappa[2]","kappa[3]","kappa[4]","kappa[5]","kappa[6]")
 model2_parameters = c("mu[1,1]", "mu[2,1]", "mu[1,2]", "mu[2,2]", "mu[1,3]", "mu[2,3]",
 	"mu[1,4]", "mu[2,4]", "mu[1,5]", "mu[2,5]", "mu[1,6]", "mu[2,6]")
 
@@ -92,34 +93,40 @@ dev.off()
 
 # Autocorrelation
 pdf("model2_autocorr.pdf")
-autocorr.plot(mcmc_samples_model2[,c("kappa","mu[1,1]","mu[2,1]"),drop=FALSE])
+autocorr.plot(mcmc_samples_model2[,c("kappa[1]","mu[1,1]","mu[2,1]"),drop=FALSE])
 dev.off()
 
 # Chain convergence
 #gelman <- gelman.diag(mcmc_samples_model2[,c(model2_parameters,"kappa"),drop=FALSE])
 #Multivariate psf seems to fail if E allele included
-gelman <- list(gelman.diag(mcmc_samples_model2[,c("kappa",model2_parameters[1:10])]),
+gelman <- list(gelman.diag(mcmc_samples_model2[,c(model2_kappa,model2_parameters[1:10])]),
 	           gelman.diag(mcmc_samples_model2[,model2_parameters[11:12]]))
-heidel <- heidel.diag(mcmc_samples_model2[,c(model2_parameters,"kappa"),drop=FALSE])
+heidel <- heidel.diag(mcmc_samples_model2[,c(model2_parameters,model2_kappa),drop=FALSE])
 capture.output(list("gelman"=gelman,"heidel"=heidel),file="model2_convergence_diagnostics.txt")
 
 pdf("kappa_gelman_model2.pdf",width=10,height=7)
-gelman.plot(mcmc_samples_model2[,"kappa",drop=FALSE])
+gelman.plot(mcmc_samples_model2[,model2_kappa,drop=FALSE])
 dev.off()
 
 # Plot of kappa + chain, ggplot of kappa
 pdf("kappa_chain_model2.pdf",width=10,height=7)
-plot(mcmc_samples_model2[,"kappa",drop=F])
+plot(mcmc_samples_model2[,model2_kappa,drop=F])
 dev.off()
 
-kappa_data = as.data.frame(all_chains2[,"kappa"])
-colnames(kappa_data) = "kappa"
+for (i in 1:length(alleles))
+{
+	kappa_name <- paste("kappa[",i,"]",sep='')
+	pdf_name <- paste(kappa_name,"posterior",sep="_")
 
-pdf("kappa_posterior.pdf",width=10,height=7)
-ggplot(kappa_data, aes(x=kappa)) +
-geom_histogram(aes(y=..density..), binwidth=0.025,colour="black",fill="white") +
-geom_density(alpha=0.2, fill="#FF9999") + theme_bw(base_size = 14)
-dev.off()
+	kappa_data = as.data.frame(all_chains2[,kappa_name])
+	colnames(kappa_data) = kappa_name
+
+	pdf(pdf_name,width=10,height=7)
+	ggplot(kappa_data, aes(x=kappa_name)) +
+	geom_histogram(aes(y=..density..), binwidth=0.025,colour="black",fill="white") +
+	geom_density(alpha=0.2, fill="#FF9999") + theme_bw(base_size = 14)
+	dev.off()
+}
 
 # means and 95% HPD intervals, concatenating all chains together
 conf_intervals <- p.interval(all_chains2,HPD=TRUE)
