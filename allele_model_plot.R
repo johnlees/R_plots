@@ -99,8 +99,8 @@ dev.off()
 # Chain convergence
 #gelman <- gelman.diag(mcmc_samples_model2[,c(model2_parameters,"kappa"),drop=FALSE])
 #Multivariate psf seems to fail if E allele included
-gelman <- list(gelman.diag(mcmc_samples_model2[,c(model2_kappa,model2_parameters[1:10])]),
-	           gelman.diag(mcmc_samples_model2[,model2_parameters[11:12]]))
+gelman <- list(gelman.diag(mcmc_samples_model2[,c(model2_kappa,model2_parameters[1:10]),drop=FALSE]),
+	           gelman.diag(mcmc_samples_model2[,model2_parameters[11:12],drop=FALSE]))
 heidel <- heidel.diag(mcmc_samples_model2[,c(model2_kappa,model2_parameters),drop=FALSE])
 capture.output(list("gelman"=gelman,"heidel"=heidel),file="model2_convergence_diagnostics.txt")
 
