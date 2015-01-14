@@ -113,20 +113,19 @@ pdf("kappa_chain_model2.pdf",width=10,height=7)
 plot(mcmc_samples_model2[,model2_kappa,drop=F])
 dev.off()
 
+pdf("kappa_posteriors.pdf",width=10,height=7)
 for (i in 1:length(alleles))
 {
 	kappa_name <- paste("kappa[",i,"]",sep='')
-	pdf_name <- paste("kappa",i,"posterior.pdf",sep="_")
 
 	kappa_data = as.data.frame(all_chains2[,kappa_name])
-	colnames(kappa_data) = kappa_name
+	colnames(kappa_data) = "kappa"
 
-	pdf(pdf_name,width=10,height=7)
-	ggplot(kappa_data, aes(x=kappa_name)) +
+	print(ggplot(kappa_data, aes(x=kappa)) +
 	geom_histogram(aes(y=..density..), binwidth=0.025,colour="black",fill="white") +
-	geom_density(alpha=0.2, fill="#FF9999") + theme_bw(base_size = 14)
-	dev.off()
+	geom_density(alpha=0.2, fill="#FF9999") + theme_bw(base_size = 14)) + xlab(kappa_name)
 }
+dev.off()
 
 # means and 95% HPD intervals, concatenating all chains together
 conf_intervals <- p.interval(all_chains2,HPD=TRUE)
