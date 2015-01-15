@@ -122,8 +122,8 @@ for (i in 1:length(alleles))
 	colnames(kappa_data) = "kappa"
 
 	print(ggplot(kappa_data, aes(x=kappa)) +
-	geom_histogram(aes(y=..density..), binwidth=0.025,colour="black",fill="white") +
-	geom_density(alpha=0.2, fill="#FF9999") + theme_bw(base_size = 14)) + xlab(kappa_name)
+	geom_histogram(aes(y=..density..), binwidth=(max(kappa_data$kappa) - min(kappa_data$kappa))/15,colour="black",fill="white") +
+	geom_density(alpha=0.2, fill="#FF9999") + theme_bw(base_size = 14) + xlab(kappa_name))
 }
 dev.off()
 
