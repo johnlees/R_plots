@@ -1,13 +1,17 @@
-strep_results <- read.delim("~/Documents/PhD/Pairs/strep_results.Rin")
+results <- read.delim("~/Documents/PhD/Pairs/all_results.Rin")
 
-no_outliers <- as.data.frame(subset(x=strep_results,subset=Total<15))
+no_outliers <- as.data.frame(subset(x=results,subset=Total<=10))
 
 ggplot(no_outliers, aes(x=Total)) +
-geom_histogram(binwidth=1,colour="black",fill="#FF9999") + theme_bw(base_size = 14) +
-xlab("Number of variants between samples") + ylab("Count") + 
-scale_x_discrete(breaks=seq(0,10,1),limits=seq(0,10,1))
+  geom_histogram(binwidth=1,colour="black",fill="#FF9999") + theme_bw(base_size = 14) +
+  xlab("Number of variants between samples") + ylab("Count") + 
+  scale_x_discrete(limits=seq(0,10,1),breaks=seq(0,10,1)) + facet_wrap(~Species,scales="free")
 
-outliers <- as.data.frame(subset(x=strep_results,subset=Total>=15))
+t.test(as.data.frame(subset(x=no_outliers,subset=Species=="Streptococcus pneumoniae"))$Total, 
+       as.data.frame(subset(x=no_outliers,subset=Species=="Neisseria meningitidis"))$Total)
+
+outliers <- as.data.frame(subset(x=results,subset=Total>10))
+sort(outliers$Total)
 
 # Do something with these
 
